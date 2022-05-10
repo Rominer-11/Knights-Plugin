@@ -1,8 +1,17 @@
 package me.rominer_11.knights;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.EntityPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer;
@@ -12,6 +21,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public final class Knights extends JavaPlugin implements Listener {
 
@@ -25,6 +36,25 @@ public final class Knights extends JavaPlugin implements Listener {
         System.out.println("Knights has started!");
 
         getServer().getPluginManager().registerEvents(this, this);
+
+        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+
+        //Thanks to Kody Simpson https://github.com/KodySimpson, and these two threads https://www.spigotmc.org/threads/how-to-modify-packet-data.438625/, https://devdreamz.com/question/703027-bukkit-change-players-name-above-head for this function.
+        manager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+
+                List<PlayerInfoData> data = event.getPacket().getPlayerInfoDataLists().read(0);
+                PlayerInfoData playerInfoData = data.get(0);
+                playerInfoData = new PlayerInfoData(data.get(0).getProfile().withName("Knight"), playerInfoData.getLatency(), playerInfoData.getGameMode(), playerInfoData.getDisplayName());
+
+                data.set(0, playerInfoData);
+                event.getPacket().getPlayerInfoDataLists().write(0, data);
+
+                //System.out.println(event.getPacket().getPlayerInfoDataLists().read(0).get(0).getProfile().getName() + " logged in.");
+
+            }
+        });
     }
 
     @Override
@@ -39,12 +69,8 @@ public final class Knights extends JavaPlugin implements Listener {
 
         setSkin(event.getPlayer());
         player.setDisplayName("Knight");
-        player.setPlayerListName("Knight");
-
-        GameProfile gameProfile = new GameProfile(player.getUniqueId(), "newPlayerNameHere");
-
-        ((List<Object>) infoList.get(packet)).add(playerInfoDataConstr.newInstance(packet, gameProfile, ping, gameMode, getAsIChatBaseComponent(text)));
-
+        //player.setPlayerListName("Knight");
+        event.getPlayer().setCustomName("Knight");
 
         if (!event.getPlayer().hasPlayedBefore()) {
             event.setJoinMessage(ChatColor.RED + player.getName() + ChatColor.GOLD + " joined the server for the first time!");
@@ -71,8 +97,8 @@ public final class Knights extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-
         event.setQuitMessage(ChatColor.YELLOW + "A player has left the server...");
     }
+
+
 }
