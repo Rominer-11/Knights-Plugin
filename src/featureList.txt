@@ -1,0 +1,9 @@
+Feature List:
+    - First Phase
+        - Tab list hidden
+        - Chat name "Knight"
+        - No commands
+    - Final Phase
+        - Tab list with coordinates of each player
+        - Chat name shown
+        - Normal, non-operator commands active
