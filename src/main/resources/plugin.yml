@@ -6,3 +6,6 @@ authors: [ rominer_11 ]
 description: For the knights server
 website: https://www.youtube.com/channel/UCYQe0MEe4mAFvryCRAAf52w
 depend: [ProtocolLib]
+commands:
+  track:
+    description: Command
