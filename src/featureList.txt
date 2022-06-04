@@ -7,3 +7,9 @@ Feature List:
         - Tab list with coordinates of each player
         - Chat name shown
         - Normal, non-operator commands active
+
+
+bug fixes
+    - Gamerule sleep and show advancements
+    - Fix above name
+    - Commands
